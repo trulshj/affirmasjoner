@@ -12,13 +12,16 @@ Et kort og enkelt python script som lager fine bilder med affirmasjoner til deg 
 
 ## Hvordan funker magien?
 
-Alle sitatene blir hentet fra https://zenquotes.io/
-Problemet her var at vi vil gjerne ha dem på norsk, så vi bruker Google Translate sin API får å oversette sitatene.
-Denne API'en funker bare av og til, så noen av resultatene vil bli på engelsk dessverre
+Alle sitatene blir hentet fra [https://zenquotes.io/](https://zenquotes.io/).
+Når de kommer derfra er de på engelsk, så vi bruker Google Translate sin API for å oversette dem til norsk.
+
+Deretter sjekker vi lengden på teksten og deler den opp etter behov, så bruker vi [Pillow] for å legge en boks og teksten på bildet.
 
 ## Hvordan bruke
 
-Scriptet trenger en **praw.ini** fil for å fungere, formatet på den er litt som dette
+Fontene som kan bli brukt på bildet ligger i `/fonts/` mappen. Om du vil velge en egen font kan du legge den inn i mappen her også spesifisere det i `make_affirmation()`.
+
+Scriptet trenger også en **[praw.ini](https://praw.readthedocs.io/en/latest/getting_started/configuration/prawini.html)** fil for å fungere, formatet på den er litt som dette
 
 ```ini
 [DEFAULT]
@@ -55,3 +58,5 @@ password='DITT REDDIT PASSORD'
 username='DITT REDDIT BRUKERNAVN'
 user_agent=Affirmasjoner
 ```
+
+Klient ID og alt det er kan du lage på [Reddit sin apps side](https://www.reddit.com/prefs/apps), bare scroll helt ned og trykk på "create an app".
