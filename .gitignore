@@ -1,0 +1,7 @@
+# Ignore images that are made
+/images
+*.jpg
+
+# Ignore praw config file
+praw.ini
+
