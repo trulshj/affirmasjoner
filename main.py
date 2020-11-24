@@ -23,6 +23,7 @@ def make_affirmation(image_url, affirmation_text, path_to_font, text_color, img_
         Returns:
             The path of the image you made
     '''
+    # Get the image file from the supplied URL and load it in PIL
     response = requests.get(image_url)
     affirmation_image = Image.open(BytesIO(response.content))
 
@@ -44,6 +45,7 @@ def make_affirmation(image_url, affirmation_text, path_to_font, text_color, img_
     text_position_x = int((affirmation_image.size[0] / 2) - (affirmation_font.getsize(longest_line)[0] / 2))
     text_position_y = int((affirmation_image.size[1] / 2) - (affirmation_font.getsize(affirmation_text)[1]))
 
+    # Count the number of lines 
     lines_in_text = affirmation_text.count('\n') + 1
 
     r_x1 = text_position_x - 10
@@ -68,14 +70,26 @@ def get_quote():
     '''
     translator = Translator()
 
+    # Get random quote JSON object
     response = requests.get('https://zenquotes.io/api/random')
     json = response.json()[0]
-    try:
-        translation = translator.translate(json['q'], src='en', dest='no')
-        quote = translation.text
-    except AttributeError:
-        quote = json['q']
 
+    # Translation API fails sometimes so we want to try up to ten times, if it fails then, keep original
+    translated = False
+    tries = 0
+    quote = ""
+    while not translated:
+        try:
+            translation = translator.translate(json['q'], src='en', dest='no')
+            quote = translation.text
+            translated = True
+        except AttributeError:
+            tries += 1
+            if tries >= 10:
+                quote = json['q']
+                break
+            
+    # if the quote is long, split it at commas or full stops
     if len(quote) > 16:
         if ',' in quote:
             quote = quote.replace(',', ',\n')
@@ -85,35 +99,46 @@ def get_quote():
     return(quote, json['a'])
 
 
-def get_image_url():
+def get_image_url(subreddit):
+    """returns a random image url from the 100 hot posts in a given subreddit"""
+    # create reddit instance
     reddit = praw.Reddit("Affirmasjoner")
 
-    submissions = [s.url for s in reddit.subreddit("earthporn").hot(limit=100)]
+    # get a list of submission urls
+    submissions = [s.url for s in reddit.subreddit(subreddit).hot(limit=100)]
     found_url = False
 
+    # get a url that leads to a jpg or png
     while not found_url:
         url = random.choice(submissions)
-        if url[-4:] == '.jpg':
+        if url[-4:] == '.jpg' or url[-4:] == '.png':
             return url
 
 
 def random_font(fonts):
+    """Picks a random font from the supplied list of fonts"""
     return './fonts/' + random.choice(fonts)
 
 def random_color():
-    r = random.randint(0,255)
-    g = random.randint(0,255)
-    b = random.randint(0,255)
+    """Returns a random bright RGB color"""
+    r = random.randint(64,255)
+    g = random.randint(64,255)
+    b = random.randint(64,255)
     return (r, g, b)
 
 
 def opposite_color(color):
+    """Inverts the given (r, g, b) color"""
     r = 255 - color[0]
-    g = 255 - color[0]
-    b = 255 - color[0]
+    g = 255 - color[1]
+    b = 255 - color[2]
+    # r = max(color) + min(color) - color[0]
+    # g = max(color) + min(color) - color[1]
+    # b = max(color) + min(color) - color[2]
     return (r, g, b)
 
+# Make our font list
 font_list = listdir('./fonts')
 
 if __name__ == "__main__":
-    make_affirmation(get_image_url(), get_quote()[0], random_font(font_list), random_color(), 0.9, "./images/affirmasjon")
+    make_affirmation(get_image_url("natureporn"), get_quote()[0], random_font(font_list), random_color(), 0.9, "./images/affirmasjon")
