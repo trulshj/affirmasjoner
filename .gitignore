@@ -5,3 +5,5 @@
 # Ignore praw config file
 praw.ini
 
+# We want to keep our example images
+!/examples/*.jpg

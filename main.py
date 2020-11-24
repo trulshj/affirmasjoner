@@ -77,7 +77,10 @@ def get_quote():
         quote = json['q']
 
     if len(quote) > 16:
-        quote = quote.replace(',', ',\n')
+        if ',' in quote:
+            quote = quote.replace(',', ',\n')
+        elif '. ' in quote:
+            quote = quote.replace('. ', '.\n')
 
     return(quote, json['a'])
 
